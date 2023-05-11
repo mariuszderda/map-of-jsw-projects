@@ -9,8 +9,8 @@ const map = L.map('map').setView(centerMap, 11)
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map)
 
 const jswIcon = L.icon({
-  iconUrl: '/assets/map-pin.svg',
-  shadowUrl: '/assets/map-pin-shadow.svg',
+  iconUrl: 'assets/map-pin.svg',
+  shadowUrl: 'assets/map-pin-shadow.svg',
 
   iconSize: [38, 95], // size of the icon
   shadowSize: [50, 64], // size of the shadow
@@ -117,7 +117,7 @@ const createProgramsListSidebar = (programName) => {
   }, [])
   for (const element of projectList) {
     const img = document.querySelector(`img[alt="${ element.mine }"]`)
-    img.setAttribute('src', '/assets/map-pin-selected.svg')
+    img.setAttribute('src', 'assets/map-pin-selected.svg')
   }
 
   const container = createHTMLElement('div', '', 'programs__list__container')
@@ -145,7 +145,7 @@ const createProgramsListSidebar = (programName) => {
 
 const removeProgramsListSidebar = () => {
   const imgNodeList = document.querySelectorAll('img.leaflet-marker-icon')
-  imgNodeList.forEach(img => img.setAttribute('src', '/assets/map-pin.svg'))
+  imgNodeList.forEach(img => img.setAttribute('src', 'assets/map-pin.svg'))
   document.querySelector('.programs__list__container').remove()
 }
 
