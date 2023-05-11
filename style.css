@@ -179,6 +179,7 @@ html, body {
     z-index: 9999;
     animation: fadeIn 0.5s;
     will-change: transform;
+    overflow-y: scroll;
 }
 
 [data-program] h3 {
@@ -224,6 +225,8 @@ html, body {
     width: 25%;
     height: 100%;
     position: fixed;
+    padding: 0 24px;
+    z-index:9999;
     top: 0;
     right: 0;
     background: #fff;
