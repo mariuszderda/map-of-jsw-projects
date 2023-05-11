@@ -101,6 +101,14 @@ const createHTMLElement = (elementHTML, innerHTMLElement = '', className = '') =
   return element
 }
 
+const  createCloseCross = (container) => {
+  const cross = document.createElement('div')
+  cross.classList.add('cross')
+  container.appendChild(cross)
+  cross.addEventListener('click', () => {
+    cross.parentNode.remove()
+  })
+}
 const createProgramsListSidebar = (programName) => {
   const projectList = properties.reduce((acc, item) => {
     const filter = item.projects.filter(prj => prj.program === programName)
@@ -220,6 +228,9 @@ const createSideBar = (name) => {
       container.appendChild(projectList)
     }
   })
+
+  createCloseCross(container);
+
   document.body.appendChild(container)
   console.timeEnd('sidebar')
 }
