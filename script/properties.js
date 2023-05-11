@@ -12,6 +12,7 @@ const properties = [
       {
         name: 'project aaa',
         program: 'program ddd'
+
       },
       {
         name: 'project bbb',

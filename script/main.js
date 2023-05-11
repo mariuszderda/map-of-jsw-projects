@@ -1,8 +1,10 @@
 // import { properties } from "./properties.js";
+// 50.0384982816764, 18.621476343147094
+50.21634353379086, 18.672674953470707
+// const centerMap = [49.964882, 18.6047696]
+const centerMap = [50.10134353379086, 18.672674953470707]
 
-const centerMap = [49.964882, 18.6047696]
-
-const map = L.map('map').setView(centerMap, 10)
+const map = L.map('map').setView(centerMap, 11)
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map)
 
@@ -99,7 +101,56 @@ const createHTMLElement = (elementHTML, innerHTMLElement = '', className = '') =
   return element
 }
 
+const createProgramsListSidebar = (programName) => {
+  const projectList = properties.reduce((acc, item) => {
+    const filter = item.projects.filter(prj => prj.program === programName)
+    if (filter.length > 0) {
+      return [
+        ...acc,
+        {
+          mine: item.mine,
+          projects: filter
+        }
+      ]
+    }
+    return [...acc]
+  }, [])
+  for (const element of projectList) {
+    const img = document.querySelector(`img[alt="${ element.mine }"]`)
+    img.setAttribute('src', '/assets/map-pin-selected.svg')
+  }
+
+  const container = createHTMLElement('div', '', 'programs__list__container')
+  const titleHTML = createHTMLElement('h2', programName)
+  container.appendChild(titleHTML)
+
+  const programsList = createHTMLElement('ul','', 'program_list')
+
+  for (const element of projectList) {
+    console.log('elemrnt',element)
+    const mineName = createHTMLElement('h3',element.mine)
+    programsList.appendChild(mineName)
+    const projectList = createHTMLElement('ul','', 'project__list')
+    element.projects.forEach(el => {
+      const projectItem = createHTMLElement('li', el.name, 'project__item')
+      projectList.appendChild(projectItem)
+    })
+    programsList.appendChild(projectList)
+  }
+
+  container.appendChild(programsList)
+  document.body.appendChild(container)
+
+}
+
+const removeProgramsListSidebar = () => {
+  const imgNodeList = document.querySelectorAll('img.leaflet-marker-icon')
+  imgNodeList.forEach(img => img.setAttribute('src', '/assets/map-pin.svg'))
+  document.querySelector('.programs__list__container').remove()
+}
+
 const createSideBar = (name) => {
+  console.time('sidebar')
   const programsRaw = properties.find(item => item.mine === name)
   const programsSort = projectsOnMap(programsRaw.projects)
 
@@ -132,21 +183,21 @@ const createSideBar = (name) => {
 
   const titleHTML = createHTMLElement('div', titleWithLogo(programsRaw.mine), '')
   const container = createHTMLElement('div', '', 'container')
-
   container.appendChild(titleHTML)
 
   programsSort.forEach(el => {
-    // console.log('el1', el)
     if (el.programs) {
       const title = createHTMLElement('h3', 'Programy:', '')
       container.appendChild(title)
       const programList = createHTMLElement('ul', '', 'program__list')
 
       el.programs.forEach(pr => {
-
         const projectList = createHTMLElement('ul', '', 'project__list')
         const programTitle = createHTMLElement('h5', pr.name, 'program__title')
         const programItem = createHTMLElement('li', '', 'program__item')
+
+        programTitle.addEventListener('mouseenter', createProgramsListSidebar.bind(null, pr.name))
+        programTitle.addEventListener('mouseleave', removeProgramsListSidebar)
 
         programItem.appendChild(programList)
         programList.appendChild(programTitle)
@@ -167,14 +218,14 @@ const createSideBar = (name) => {
         projectList.appendChild(projectItem)
       })
       container.appendChild(projectList)
-      console.log(el.projects)
     }
   })
   document.body.appendChild(container)
+  console.timeEnd('sidebar')
 }
 
 for (const element of properties) {
-  const marker = L.marker([element.position.lat, element.position.lng], { icon: jswIcon }).addTo(map)
+  const marker = L.marker([element.position.lat, element.position.lng], { icon: jswIcon, alt: element.mine }).addTo(map)
 
   marker.setLatLng([element.position.lat, element.position.lng])
   marker.bindPopup(popupContent(element.mine))
