@@ -1,29 +1,28 @@
-// import { properties } from "./properties.js";
-// 50.0384982816764, 18.621476343147094
-50.21634353379086, 18.672674953470707
-// const centerMap = [49.964882, 18.6047696]
-const centerMap = [50.10134353379086, 18.672674953470707]
+document.addEventListener("DOMContentLoaded", function () {
+  const centerMap = [50.10134353379086, 18.672674953470707];
 
-const map = L.map('map').setView(centerMap, 11)
+  const map = L.map("map").setView(centerMap, 11);
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map)
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+  }).addTo(map);
 
-const jswIcon = L.icon({
-  iconUrl: 'assets/map-pin.svg',
-  shadowUrl: 'assets/map-pin-shadow.svg',
+  const jswIcon = L.icon({
+    iconUrl: "assets/map-pin.svg",
+    shadowUrl: "assets/map-pin-shadow.svg",
 
-  iconSize: [38, 95], // size of the icon
-  shadowSize: [50, 64], // size of the shadow
-  iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
-  shadowAnchor: [4, 62],  // the same for the shadow
-  popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
-})
+    iconSize: [38, 95], // size of the icon
+    shadowSize: [50, 64], // size of the shadow
+    iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
+    shadowAnchor: [4, 62], // the same for the shadow
+    popupAnchor: [-3, -76], // point from which the popup should open relative to the iconAnchor
+  });
 
-const popupContent = (name) => {
-  const content = document.createElement("div");
+  const popupContent = (name) => {
+    const content = document.createElement("div");
 
-  content.classList.add("property");
-  content.innerHTML = `
+    content.classList.add("property");
+    content.innerHTML = `
     <div class="icon">
         <div class="fa-building">
         <svg xmlns="http://www.w3.org/2000/svg" version="1.0" width="434.000000pt" height="434.000000pt" viewBox="0 0 434.000000 434.000000" preserveAspectRatio="xMidYMid meet">
@@ -36,139 +35,145 @@ const popupContent = (name) => {
     </g>
         </svg>
         </div>
-        <span class="fa-sr-only">${ name }</span>
+        <span class="fa-sr-only">${name}</span>
     </div>
     <div class="details">
-        <h2 class="minor" data-mine="${ name }">${ name }</h2>
+        <h2 class="minor" data-mine="${name}">${name}</h2>
     
     </div>
     `;
-  return content
-}
+    return content;
+  };
 
-const projectsOnMap = (projects) => {
-  const programsInUnit = []
-  projects.forEach(el => {
-    const programsIndex = programsInUnit.findIndex(el => el.programs)
-    if (el.program) {
-      if (programsIndex >= 0) {
-        const programIndex = programsInUnit[programsIndex].programs.findIndex(element => element.name === el.program)
-        programIndex >= 0
-          ? programsInUnit[programsIndex].programs[programIndex].projects.push({
-            name: el.name
-          })
-          : programsInUnit[programsIndex].programs.push({
-            name: el.program,
-            projects: [
+  const projectsOnMap = (projects) => {
+    const programsInUnit = [];
+    projects.forEach((el) => {
+      const programsIndex = programsInUnit.findIndex((el) => el.programs);
+      if (el.program) {
+        if (programsIndex >= 0) {
+          const programIndex = programsInUnit[programsIndex].programs.findIndex(
+            (element) => element.name === el.program
+          );
+          programIndex >= 0
+            ? programsInUnit[programsIndex].programs[
+                programIndex
+              ].projects.push({
+                name: el.name,
+              })
+            : programsInUnit[programsIndex].programs.push({
+                name: el.program,
+                projects: [
+                  {
+                    name: el.name,
+                  },
+                ],
+              });
+        } else {
+          programsInUnit.unshift({
+            programs: [
               {
-                name: el.name
-              }
-            ]
-          })
-      } else {
-        programsInUnit.unshift({
-          programs: [
-            {
-              name: el.program,
-              projects: [
-                {
-                  name: el.name
-                }
-              ]
-            }
-          ]
-        })
-      }
-    } else {
-      const projectsIndex = programsInUnit.findIndex(el => el.projects)
-      !!!programsInUnit[projectsIndex]
-        ? programsInUnit.push({ projects: [{ name: el.name }] })
-        : programsInUnit[projectsIndex].projects.push({ name: el.name })
-    }
-  })
-  return programsInUnit
-}
-
-const createHTMLElement = (elementHTML, innerHTMLElement = '', className = '') => {
-
-  const element = document.createElement(elementHTML)
-  if (className) {
-    element.classList.add(className)
-  }
-  if (innerHTMLElement) {
-    element.innerHTML = innerHTMLElement
-  }
-  return element
-}
-
-const  createCloseCross = (container) => {
-  const cross = document.createElement('div')
-  cross.classList.add('cross')
-  container.appendChild(cross)
-  cross.addEventListener('click', () => {
-    cross.parentNode.remove()
-  })
-}
-const createProgramsListSidebar = (programName) => {
-  const projectList = properties.reduce((acc, item) => {
-    const filter = item.projects.filter(prj => prj.program === programName)
-    if (filter.length > 0) {
-      return [
-        ...acc,
-        {
-          mine: item.mine,
-          projects: filter
+                name: el.program,
+                projects: [
+                  {
+                    name: el.name,
+                  },
+                ],
+              },
+            ],
+          });
         }
-      ]
+      } else {
+        const projectsIndex = programsInUnit.findIndex((el) => el.projects);
+        !!!programsInUnit[projectsIndex]
+          ? programsInUnit.push({ projects: [{ name: el.name }] })
+          : programsInUnit[projectsIndex].projects.push({ name: el.name });
+      }
+    });
+    return programsInUnit;
+  };
+
+  const createHTMLElement = (
+    elementHTML,
+    innerHTMLElement = "",
+    className = ""
+  ) => {
+    const element = document.createElement(elementHTML);
+    if (className) {
+      element.classList.add(className);
     }
-    return [...acc]
-  }, [])
-  for (const element of projectList) {
-    const img = document.querySelector(`img[alt="${ element.mine }"]`)
-    img.setAttribute('src', 'assets/map-pin-selected.svg')
-  }
+    if (innerHTMLElement) {
+      element.innerHTML = innerHTMLElement;
+    }
+    return element;
+  };
 
-  const container = createHTMLElement('div', '', 'programs__list__container')
-  const titleHTML = createHTMLElement('h2', programName)
-  container.appendChild(titleHTML)
+  const createCloseCross = (container) => {
+    const cross = document.createElement("div");
+    cross.classList.add("cross");
+    container.appendChild(cross);
+    cross.addEventListener("click", () => {
+      cross.parentNode.remove();
+    });
+  };
+  const createProgramsListSidebar = (programName) => {
+    const projectList = properties.reduce((acc, item) => {
+      const filter = item.projects.filter((prj) => prj.program === programName);
+      if (filter.length > 0) {
+        return [
+          ...acc,
+          {
+            mine: item.mine,
+            projects: filter,
+          },
+        ];
+      }
+      return [...acc];
+    }, []);
+    for (const element of projectList) {
+      const img = document.querySelector(`img[alt="${element.mine}"]`);
+      img.setAttribute("src", "assets/map-pin-selected.svg");
+    }
 
-  const programsList = createHTMLElement('ul','', 'program_list')
+    const container = createHTMLElement("div", "", "programs__list__container");
+    const titleHTML = createHTMLElement("h2", programName);
+    container.appendChild(titleHTML);
 
-  for (const element of projectList) {
-    console.log('elemrnt',element)
-    const mineName = createHTMLElement('h3',element.mine)
-    programsList.appendChild(mineName)
-    const projectList = createHTMLElement('ul','', 'project__list')
-    element.projects.forEach(el => {
-      const projectItem = createHTMLElement('li', el.name, 'project__item')
-      projectList.appendChild(projectItem)
-    })
-    programsList.appendChild(projectList)
-  }
+    const programsList = createHTMLElement("ul", "", "program_list");
 
-  container.appendChild(programsList)
-  document.body.appendChild(container)
+    for (const element of projectList) {
+      console.log("elemrnt", element);
+      // const mineName = createHTMLElement("h3", element.mine);
+      // programsList.appendChild(mineName);
+      const projectList = createHTMLElement("ul", "", "project__list");
+      element.projects.forEach((el) => {
+        const projectItem = createHTMLElement("li", el.name, "project__item");
+        projectList.appendChild(projectItem);
+      });
+      programsList.appendChild(projectList);
+    }
 
-}
+    container.appendChild(programsList);
+    document.body.appendChild(container);
+  };
 
-const removeProgramsListSidebar = () => {
-  const imgNodeList = document.querySelectorAll('img.leaflet-marker-icon')
-  imgNodeList.forEach(img => img.setAttribute('src', 'assets/map-pin.svg'))
-  document.querySelector('.programs__list__container').remove()
-}
+  const removeProgramsListSidebar = () => {
+    const imgNodeList = document.querySelectorAll("img.leaflet-marker-icon");
+    imgNodeList.forEach((img) => img.setAttribute("src", "assets/map-pin.svg"));
+    document.querySelector(".programs__list__container").remove();
+  };
 
-const createSideBar = (name) => {
-  console.time('sidebar')
-  const programsRaw = properties.find(item => item.mine === name)
-  const programsSort = projectsOnMap(programsRaw.projects)
+  const createMineSidebar = (name) => {
+    console.time("sidebar");
+    const programsRaw = properties.find((item) => item.mine === name);
+    const programsSort = projectsOnMap(programsRaw.projects);
 
-  const oldContainer = document.querySelector('.container')
-  if (oldContainer) {
-    oldContainer.remove()
-  }
+    const oldContainer = document.querySelector(".container");
+    if (oldContainer) {
+      oldContainer.remove();
+    }
 
-  const titleWithLogo = (name) => {
-    return `
+    const titleWithLogo = (name) => {
+      return `
         <div class="title__container">
             <div class="logo">
               <svg class="logo" xmlns="http://www.w3.org/2000/svg" version="1.0" viewBox="0 0 434.000000 434.000000" preserveAspectRatio="xMidYMid meet">
@@ -184,88 +189,98 @@ const createSideBar = (name) => {
                 </g>
               </svg>
             </div>
-            <h2>${ name }</h2>
+            <h2>${name}</h2>
         </div>    
-`
+`;
+    };
+
+    const titleHTML = createHTMLElement(
+      "div",
+      titleWithLogo(programsRaw.mine),
+      ""
+    );
+    const container = createHTMLElement("div", "", "container");
+    container.appendChild(titleHTML);
+
+    programsSort.forEach((el) => {
+      if (el.programs) {
+        const title = createHTMLElement("h3", "Programy:", "");
+        container.appendChild(title);
+        const programList = createHTMLElement("ul", "", "program__list");
+
+        el.programs.forEach((pr) => {
+          const projectList = createHTMLElement("ul", "", "project__list");
+          const programTitle = createHTMLElement(
+            "h5",
+            pr.name,
+            "program__title"
+          );
+          const programItem = createHTMLElement("li", "", "program__item");
+
+          programTitle.addEventListener(
+            "mouseenter",
+            createProgramsListSidebar.bind(null, pr.name)
+          );
+          programTitle.addEventListener(
+            "mouseleave",
+            removeProgramsListSidebar
+          );
+
+          programItem.appendChild(programList);
+          programList.appendChild(programTitle);
+
+          pr.projects.forEach((project) => {
+            const projectItem = createHTMLElement(
+              "li",
+              project.name,
+              "project__item"
+            );
+            projectList.appendChild(projectItem);
+          });
+          programList.appendChild(projectList);
+        });
+        container.appendChild(programList);
+      } else if (el.projects) {
+        const projectList = createHTMLElement("ul", "", "project__list");
+        const title = createHTMLElement("h3", "Projekty:", "");
+        container.appendChild(title);
+        el.projects.forEach((project) => {
+          const projectItem = createHTMLElement(
+            "li",
+            project.name,
+            "project__item"
+          );
+          projectList.appendChild(projectItem);
+        });
+        container.appendChild(projectList);
+      }
+    });
+    console.log(container);
+
+    createCloseCross(container);
+
+    document.body.appendChild(container);
+    console.timeEnd("sidebar");
+  };
+
+  for (const element of properties) {
+    const marker = L.marker([element.position.lat, element.position.lng], {
+      icon: jswIcon,
+      alt: element.mine,
+    }).addTo(map);
+
+    marker.setLatLng([element.position.lat, element.position.lng]);
+    marker.bindPopup(popupContent(element.mine));
+
+    marker.on("mouseover", function (e) {
+      this._popup._content.classList.add("highlight");
+      createMineSidebar(element.mine);
+      this.openPopup();
+    });
+
+    // TODO close popup if mouse not enter on popup
+    marker.on("mouseout", function (e) {
+      this.closePopup();
+    });
   }
-
-  const titleHTML = createHTMLElement('div', titleWithLogo(programsRaw.mine), '')
-  const container = createHTMLElement('div', '', 'container')
-  container.appendChild(titleHTML)
-
-  programsSort.forEach(el => {
-    if (el.programs) {
-      const title = createHTMLElement('h3', 'Programy:', '')
-      container.appendChild(title)
-      const programList = createHTMLElement('ul', '', 'program__list')
-
-      el.programs.forEach(pr => {
-        const projectList = createHTMLElement('ul', '', 'project__list')
-        const programTitle = createHTMLElement('h5', pr.name, 'program__title')
-        const programItem = createHTMLElement('li', '', 'program__item')
-
-        programTitle.addEventListener('mouseenter', createProgramsListSidebar.bind(null, pr.name))
-        programTitle.addEventListener('mouseleave', removeProgramsListSidebar)
-
-        programItem.appendChild(programList)
-        programList.appendChild(programTitle)
-
-        pr.projects.forEach(project => {
-          const projectItem = createHTMLElement('li', project.name, 'project__item')
-          projectList.appendChild(projectItem)
-        })
-        programList.appendChild(projectList)
-      })
-      container.appendChild(programList)
-    } else if (el.projects) {
-      const projectList = createHTMLElement('ul', '', 'project__list')
-      const title = createHTMLElement('h3', 'Projekty:', '')
-      container.appendChild(title)
-      el.projects.forEach(project => {
-        const projectItem = createHTMLElement('li', project.name, 'project__item')
-        projectList.appendChild(projectItem)
-      })
-      container.appendChild(projectList)
-    }
-  })
-
-  createCloseCross(container);
-
-  document.body.appendChild(container)
-  console.timeEnd('sidebar')
-}
-
-for (const element of properties) {
-  const marker = L.marker([element.position.lat, element.position.lng], { icon: jswIcon, alt: element.mine }).addTo(map)
-
-  marker.setLatLng([element.position.lat, element.position.lng])
-  marker.bindPopup(popupContent(element.mine))
-
-  const titleClick = marker._popup._content.querySelector('h2')
-
-  titleClick.addEventListener('click', function () {
-    createSideBar(element.mine)
-    marker.closePopup()
-  })
-
-  const property = marker._popup._content
-
-  property.addEventListener('mouseleave', function () {
-    marker.closePopup()
-  })
-
-  marker.on('mouseover', function (e) {
-    this._popup._content.classList.add('highlight')
-    this.openPopup()
-  })
-
-  // TODO close popup if mouse not enter on popup
-  // marker.on('mouseout', function (e) {
-  //   const popup = document.querySelector('.leaflet-popup ')
-  //
-  //   console.log(!!popup)
-  //   if (!!popup && mouseOnPopup) {
-  //   this.closePopup()
-  //   }
-  // })
-}
+});
