@@ -164,6 +164,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       return [...acc];
     }, []);
+
     for (const element of projectList) {
       const img = document.querySelector(`img[alt="${element.mine}"]`);
       img.setAttribute("src", "assets/map-pin-selected.svg");
@@ -187,7 +188,25 @@ document.addEventListener("DOMContentLoaded", function () {
       const projectList = createHTMLElement("ul", "", "project__list");
       element.projects.forEach((el) => {
         const projectItem = createHTMLElement("li", el.name, "project__item");
+        const detailSpan = createHTMLElement("span", "(szczegóły)", "detail");
+
+        projectItem.appendChild(detailSpan);
         projectList.appendChild(projectItem);
+
+        detailSpan.addEventListener("click", () => {
+          const exsist = document.querySelector(".programs__list__container");
+          if (exsist) exsist.remove();
+
+          const container = createHTMLElement(
+            "div",
+            createDetailList(el, true),
+            "programs__list__container"
+          );
+
+          document.body.appendChild(container);
+        });
+
+        // TODO
       });
       programsList.appendChild(projectList);
     }
