@@ -193,6 +193,7 @@ html, body {
     font-size: 20px;
     line-height: 29px;
     font-weight: 600;
+    display: block;
     /*padding-left: 16px;*/
     margin: 16px;
     cursor: pointer;
@@ -232,6 +233,7 @@ html, body {
     background: #fff;
     animation: fadeInProgram 0.5s forwards;
     will-change: transform;
+    overflow-y: scroll;
 }
 
 .programs__list__container h4 {
@@ -312,5 +314,43 @@ html, body {
 }
 .logo svg g {
     fill: var(--building-color)
+}
 
+.program__title:hover .detail,
+.project__item:hover .detail {
+    opacity: 1;
+}
+
+.detail {
+   opacity: 0;
+    font-size: 12px;
+    color: #888;
+    margin: 0 0 0 12px;
+    padding: 0;
+    cursor: pointer;
+
+}
+
+.detail_container {
+    /*background-color: #f00;*/
+    width: 100%;
+    height: 0;
+    transform: scaleY(0);
+    transition: all .2s linear;
+    font-size: 12px;
+}
+
+.detail_container span {
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.detail_container.active {
+    height: 100%;
+    transform: scaleY(1);
+}
+
+.programs__list__container .program_list {
+    padding: 0;
 }

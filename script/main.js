@@ -1,8 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   const centerMap = [50.10134353379086, 18.672674953470707];
-
   const map = L.map("map").setView(centerMap, 11);
-
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
   }).addTo(map);
@@ -58,13 +56,14 @@ document.addEventListener("DOMContentLoaded", function () {
             ? programsInUnit[programsIndex].programs[
                 programIndex
               ].projects.push({
-                name: el.name,
+                ...el,
               })
             : programsInUnit[programsIndex].programs.push({
                 name: el.program,
+                detail: programs.find((prg) => prg.name === el.program),
                 projects: [
                   {
-                    name: el.name,
+                    ...el,
                   },
                 ],
               });
@@ -73,9 +72,10 @@ document.addEventListener("DOMContentLoaded", function () {
             programs: [
               {
                 name: el.program,
+                detail: programs.find((prg) => prg.name === el.program),
                 projects: [
                   {
-                    name: el.name,
+                    ...el,
                   },
                 ],
               },
@@ -85,8 +85,8 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         const projectsIndex = programsInUnit.findIndex((el) => el.projects);
         !!!programsInUnit[projectsIndex]
-          ? programsInUnit.push({ projects: [{ name: el.name }] })
-          : programsInUnit[projectsIndex].projects.push({ name: el.name });
+          ? programsInUnit.push({ projects: [{ ...el }] })
+          : programsInUnit[projectsIndex].projects.push({ ...el });
       }
     });
     return programsInUnit;
@@ -115,9 +115,44 @@ document.addEventListener("DOMContentLoaded", function () {
       cross.parentNode.remove();
     });
   };
-  const createProgramsListSidebar = (programName) => {
+
+  const createDetailList = (details, isProject = false) => {
+    const title = isProject ? `<h2>${details.name}</h2>` : "";
+    const footer = !isProject
+      ? `<hr /><h3>Projekty wchodzące w skład programu:</h3>`
+      : "";
+
+    const activeClass = isProject ? "active" : null;
+
+    return `
+        ${title}
+        <div class="detail_container ${activeClass}">      
+        <p>Przewodniczący Komitetu Sterującego: <span>${details.chairman}</span></p>
+        <p>Kierownik projektu: <span>${details.manager}</span></p>
+        <hr />
+        <p>Data rozpoczęcia: <span>${details.startDate}</span></p>
+        <p>Data zakończenia: <span>${details.endDate}</span></p>
+        <hr />
+        <p>Budżet pierwotny: <span>${details.originalBudget}</span></p>
+        <p>Budżet Aktualny: <span>${details.actualBudget}</span></p>
+        <hr />
+        <p>Opis projektu: <span>${details.projectDescription}</span></p>
+        <p>Główne cele projektu: <span>${details.mainGoal}</span></p>
+        <p>Faza projektu: <span>${details.status}</span></p>
+        ${footer}
+    `;
+  };
+
+  const createProgramsListSidebar = (program) => {
+    const oldDetailContainer = document.querySelector(
+      ".programs__list__container"
+    );
+    if (oldDetailContainer) oldDetailContainer.remove();
+
     const projectList = properties.reduce((acc, item) => {
-      const filter = item.projects.filter((prj) => prj.program === programName);
+      const filter = item.projects.filter(
+        (prj) => prj.program === program.name
+      );
       if (filter.length > 0) {
         return [
           ...acc,
@@ -135,13 +170,18 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const container = createHTMLElement("div", "", "programs__list__container");
-    const titleHTML = createHTMLElement("h2", programName);
+    const titleHTML = createHTMLElement("h2", program.name);
     container.appendChild(titleHTML);
+
+    const programDettail = createDetailList(program.detail);
+
+    console.log("project list", program);
+
+    container.appendChild(createHTMLElement("div", programDettail));
 
     const programsList = createHTMLElement("ul", "", "program_list");
 
     for (const element of projectList) {
-      console.log("elemrnt", element);
       // const mineName = createHTMLElement("h3", element.mine);
       // programsList.appendChild(mineName);
       const projectList = createHTMLElement("ul", "", "project__list");
@@ -151,6 +191,8 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       programsList.appendChild(projectList);
     }
+
+    const programDetail = programs.find((prg) => prg.name === program.name);
 
     container.appendChild(programsList);
     document.body.appendChild(container);
@@ -215,18 +257,31 @@ document.addEventListener("DOMContentLoaded", function () {
             pr.name,
             "program__title"
           );
+
           const programItem = createHTMLElement("li", "", "program__item");
+          const detailSpan = createHTMLElement("span", "(szczegóły)", "detail");
 
           programTitle.addEventListener(
             "mouseenter",
-            createProgramsListSidebar.bind(null, pr.name)
+            createProgramsListSidebar.bind(this, pr)
           );
           programTitle.addEventListener(
             "mouseleave",
             removeProgramsListSidebar
           );
 
+          detailSpan.addEventListener("click", () => {
+            const detailContainer = document.querySelector(".detail_container");
+
+            detailContainer.classList.toggle("active");
+            programTitle.removeEventListener(
+              "mouseleave",
+              removeProgramsListSidebar
+            );
+          });
+
           programItem.appendChild(programList);
+          programTitle.appendChild(detailSpan);
           programList.appendChild(programTitle);
 
           pr.projects.forEach((project) => {
@@ -235,6 +290,27 @@ document.addEventListener("DOMContentLoaded", function () {
               project.name,
               "project__item"
             );
+            const detailSpan = createHTMLElement(
+              "span",
+              "(szczegóły)",
+              "detail"
+            );
+            detailSpan.addEventListener("click", () => {
+              const exsist = document.querySelector(
+                ".programs__list__container"
+              );
+              if (exsist) exsist.remove();
+
+              const container = createHTMLElement(
+                "div",
+                createDetailList(project, true),
+                "programs__list__container"
+              );
+              createCloseCross(container);
+
+              document.body.appendChild(container);
+            });
+            projectItem.appendChild(detailSpan);
             projectList.appendChild(projectItem);
           });
           programList.appendChild(projectList);
@@ -250,13 +326,26 @@ document.addEventListener("DOMContentLoaded", function () {
             project.name,
             "project__item"
           );
+          const detailSpan = createHTMLElement("span", "(szczegóły)", "detail");
+          detailSpan.addEventListener("click", () => {
+            const exsist = document.querySelector(".programs__list__container");
+            if (exsist) exsist.remove();
+
+            const container = createHTMLElement(
+              "div",
+              createDetailList(project, true),
+              "programs__list__container"
+            );
+            createCloseCross(container);
+
+            document.body.appendChild(container);
+          });
+          projectItem.appendChild(detailSpan);
           projectList.appendChild(projectItem);
         });
         container.appendChild(projectList);
       }
     });
-    console.log(container);
-
     createCloseCross(container);
 
     document.body.appendChild(container);
@@ -274,8 +363,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     marker.on("mouseover", function (e) {
       this._popup._content.classList.add("highlight");
+      const exsist = document.querySelector(".programs__list__container");
+      if (exsist) exsist.remove();
       createMineSidebar(element.mine);
       this.openPopup();
+    });
+    marker.on("keydown", function (e) {
+      if (e.originalEvent.keyCode === 13) {
+        this._popup._content.classList.add("highlight");
+        createMineSidebar(element.mine);
+      }
     });
 
     // TODO close popup if mouse not enter on popup
